@@ -108,6 +108,15 @@ done:
 	return location
 }
 
+func containsString(list []string, a string) bool {
+	for _, b := range list {
+		if b == a {
+			return true
+		}
+	}
+	return false
+}
+
 func main() {
 	app := cli.NewApp()
 	app.Name = "go_path_manager"
@@ -116,7 +125,7 @@ func main() {
 		{
 			Name:      "list",
 			ShortName: "l",
-			Usage:     "list your path",
+			Usage:     "Lists the directories in your PATH variable.",
 			Action: func(c *cli.Context) {
 				fmt.Println("This is your current $PATH:")
 				pathItems := strings.Split(os.Getenv("PATH"), ":")
@@ -132,7 +141,7 @@ func main() {
 		{
 			Name:      "prepend",
 			ShortName: "p",
-			Usage:     "prepend a directory to your path",
+			Usage:     "Prepends the directory to your PATH variable",
 			Action: func(c *cli.Context) {
 				fmt.Println("added task: ", c.Args().First())
 			},
@@ -140,7 +149,7 @@ func main() {
 		{
 			Name:      "append",
 			ShortName: "a",
-			Usage:     "append a directory to your path",
+			Usage:     "Appends the directory to your PATH variable",
 			Action: func(c *cli.Context) {
 				fmt.Println("added task: ", c.Args().First())
 			},
@@ -148,9 +157,29 @@ func main() {
 		{
 			Name:      "which",
 			ShortName: "w",
-			Usage:     "show the location of a program in your path",
+			Usage:     "Shows the the different path entry where the program appears. Like which, but not just with the first location",
 			Action: func(c *cli.Context) {
-				fmt.Println("added task: ", c.Args().First())
+				fmt.Println("Warning: If you use rbenv, then the order may be incorrect for gems.")
+				program := c.Args().First()
+				path := strings.Split(os.Getenv("PATH"), ":")
+				var directories []string
+				for _, dir := range path {
+					file, err := os.Open(dir)
+					if err != nil {
+						continue
+					}
+					defer file.Close()
+					entries, err := file.Readdirnames(0)
+					if err != nil {
+						log.Fatal(err)
+					}
+					if containsString(entries, program) {
+						directories = append(directories, dir+"/"+program)
+					}
+				}
+				for i, dir := range directories {
+					fmt.Printf("%d. %s\n", i+1, dir)
+				}
 			},
 		},
 	}
