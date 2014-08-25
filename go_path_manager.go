@@ -2,7 +2,6 @@ package main
 
 import (
 	"bufio"
-	"encoding/json"
 	"fmt"
 	"log"
 	"os"
@@ -13,39 +12,44 @@ import (
 	//"github.com/codegangsta/cli"
 )
 
-type Config struct {
-	Zsh, Bash, Sh, Ksh []string
-}
-
 type Location struct {
 	Path string
 	Line int
 }
 
 func getPathLocation() Location {
-	file, err := os.Open("./config.json")
-	if err != nil {
-		log.Fatalln(err)
+	config := map[string][]string{
+		"zsh": []string{
+			"~/.zshrc",
+			"/etc/profile",
+			"~/.profile",
+			"/etc/zshenv",
+			"/etc/zprofile",
+			"/etc/zshrc",
+			"/etc/zlogin",
+			"/etc/zlogout",
+			"~/.zshenv",
+			"~/.zprofile",
+			"~/.zlogin",
+		},
+		"bash": []string{
+			"/etc/profile",
+			"~/.profile",
+			"~/.bash_profile",
+			"~/.bash_login",
+			"~/.bash_logout",
+			"~/.bashrc",
+		},
+		"sh": []string{
+			"/etc/profile",
+			"~/.profile",
+		},
+		"ksh": []string{
+			"/etc/profile",
+			"~/.profile",
+			"~/.kshrc",
+		},
 	}
-	defer file.Close()
-
-	data := make([]byte, 600)
-	n, err := file.Read(data)
-	if err != nil {
-		log.Fatalln(err)
-	}
-
-	var config Config
-	err = json.Unmarshal(data[:n], &config)
-	if err != nil {
-		log.Fatalln(err)
-	}
-
-	configDict := map[string][]string{
-		"zsh":  config.Zsh,
-		"bash": config.Bash,
-		"sh":   config.Sh,
-		"ksh":  config.Ksh}
 
 	usercmd := exec.Command("whoami")
 	rawUser, err := usercmd.Output()
@@ -67,7 +71,7 @@ func getPathLocation() Location {
 	}
 
 	shell := strings.Split(shellStr, "/")[2]
-	paths := configDict[shell]
+	paths := config[shell]
 
 	usr, err := user.Current()
 	if err != nil {
