@@ -99,6 +99,8 @@ func getPathLocation() Location {
 		}
 	}
 
+	goto done
+
 done:
 	return location
 }
