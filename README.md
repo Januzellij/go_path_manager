@@ -10,5 +10,9 @@ This is a port of Charley Hutchison's <a href="https://github.com/glenwayguy/pat
 
 3) I thought it would be fun to get a bit of Ruby knowledge
 
+## TODO
+- Get rid of the goto if possible
+- implement commands
+
 ## Note
 This code is not even close to the best it could be. There is a bloody **goto** in there, for crying out loud.
