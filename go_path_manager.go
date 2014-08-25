@@ -9,7 +9,8 @@ import (
 	"os/user"
 	"regexp"
 	"strings"
-	//"github.com/codegangsta/cli"
+
+	"github.com/codegangsta/cli"
 )
 
 type Location struct {
@@ -72,7 +73,6 @@ func getPathLocation() Location {
 
 	shell := strings.Split(shellStr, "/")[2]
 	paths := config[shell]
-
 	usr, err := user.Current()
 	if err != nil {
 		log.Fatal(err)
@@ -84,7 +84,6 @@ func getPathLocation() Location {
 
 	search := regexp.MustCompile(`^(?:export )?PATH=`)
 	location := Location{}
-
 	for _, v := range paths {
 		file, err := os.Open(v)
 		if err != nil {
@@ -92,14 +91,14 @@ func getPathLocation() Location {
 		}
 		defer file.Close()
 		scanner := bufio.NewScanner(file)
-		j := 0
+		i := 0
 		for scanner.Scan() {
 			if search.Match([]byte(scanner.Text())) {
 				location.Path = v
-				location.Line = j + 1
+				location.Line = i + 1
 				goto done
 			}
-			j++
+			i++
 		}
 	}
 
@@ -110,43 +109,50 @@ done:
 }
 
 func main() {
-	/*app := cli.NewApp()
-	  	app.Name = "go_path_manager"
-	  	app.Usage = "manage your path variable"
-	  	app.Commands = []cli.Command{
-	  		{
-	  			Name:      "list",
-	    		ShortName: "l",
-	    		Usage:     "list your path",
-	    		Action: func(c *cli.Context) {
-	      			println("added task: ", c.Args().First())
-	    		}
-	  		},
-	  		{
-	  			Name:      "prepend",
-	    		ShortName: "p",
-	    		Usage:     "prepend a directory to your path",
-	    		Action: func(c *cli.Context) {
-	      			println("added task: ", c.Args().First())
-	    		}
-	  		},
-	  		{
-	  			Name:      "append",
-	    		ShortName: "a",
-	    		Usage:     "append a directory to your path",
-	    		Action: func(c *cli.Context) {
-	      			println("added task: ", c.Args().First())
-	    		}
-	  		},
-	  		{
-	  			Name:      "which",
-	    		ShortName: "w",
-	    		Usage:     "show the location of a program in your path",
-	    		Action: func(c *cli.Context) {
-	      			println("added task: ", c.Args().First())
-	    		}
-	  		}
-	  	}
-	  	app.Run(os.Args)*/
-	fmt.Println(getPathLocation())
+	app := cli.NewApp()
+	app.Name = "go_path_manager"
+	app.Usage = "manage your path variable"
+	app.Commands = []cli.Command{
+		{
+			Name:      "list",
+			ShortName: "l",
+			Usage:     "list your path",
+			Action: func(c *cli.Context) {
+				fmt.Println("This is your current $PATH:")
+				pathItems := strings.Split(os.Getenv("PATH"), ":")
+				for i, v := range pathItems {
+					if i < 9 {
+						fmt.Printf("%d.  %s\n", i+1, v)
+					} else {
+						fmt.Printf("%d. %s\n", i+1, v)
+					}
+				}
+			},
+		},
+		{
+			Name:      "prepend",
+			ShortName: "p",
+			Usage:     "prepend a directory to your path",
+			Action: func(c *cli.Context) {
+				fmt.Println("added task: ", c.Args().First())
+			},
+		},
+		{
+			Name:      "append",
+			ShortName: "a",
+			Usage:     "append a directory to your path",
+			Action: func(c *cli.Context) {
+				fmt.Println("added task: ", c.Args().First())
+			},
+		},
+		{
+			Name:      "which",
+			ShortName: "w",
+			Usage:     "show the location of a program in your path",
+			Action: func(c *cli.Context) {
+				fmt.Println("added task: ", c.Args().First())
+			},
+		},
+	}
+	app.Run(os.Args)
 }
