@@ -54,20 +54,20 @@ func getPathLocation() Location {
 	usercmd := exec.Command("whoami")
 	rawUser, err := usercmd.Output()
 	if err != nil {
-		log.Fatalln(err)
+		log.Fatal(err)
 	}
 
 	username := strings.Replace(string(rawUser), "\n", "", -1)
 	infocmd := exec.Command("finger", username)
 	info, err := infocmd.Output()
 	if err != nil {
-		log.Fatalln(err)
+		log.Fatal(err)
 	}
 
 	shellRe := regexp.MustCompile(`Shell: \/bin\/([a-zA-Z\/].*)`)
 	shellStr := shellRe.FindString(string(info))
 	if shellStr == "" {
-		log.Fatalln("Couldn't find user shell")
+		log.Fatal("Couldn't find user shell")
 	}
 
 	shell := strings.Split(shellStr, "/")[2]
@@ -103,7 +103,7 @@ func getPathLocation() Location {
 		}
 	}
 
-	goto done
+	log.Fatal("couldn't find $PATH")
 
 done:
 	return location
