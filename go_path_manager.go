@@ -159,7 +159,6 @@ func main() {
 			ShortName: "w",
 			Usage:     "Shows the the different path entry where the program appears. Like which, but not just with the first location",
 			Action: func(c *cli.Context) {
-				fmt.Println("Warning: If you use rbenv, then the order may be incorrect for gems.")
 				program := c.Args().First()
 				path := strings.Split(os.Getenv("PATH"), ":")
 				var directories []string
