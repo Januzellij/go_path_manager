@@ -143,7 +143,13 @@ func main() {
 			ShortName: "p",
 			Usage:     "Prepends the directory to your PATH variable",
 			Action: func(c *cli.Context) {
-				fmt.Println("added task: ", c.Args().First())
+				path := c.Args().First()
+				location := getPathLocation()
+				file, err := os.Open(location.Path)
+				if err != nil {
+					log.Fatal(err)
+				}
+				defer file.Close()
 			},
 		},
 		{
