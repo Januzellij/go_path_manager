@@ -14,8 +14,8 @@ import (
 )
 
 type Location struct {
-	Path string
-	Line int
+	Path  string
+	Index int
 }
 
 func getPathLocation() Location {
@@ -95,7 +95,7 @@ func getPathLocation() Location {
 		for scanner.Scan() {
 			if search.Match([]byte(scanner.Text())) {
 				location.Path = v
-				location.Line = i + 1
+				location.Index = i
 				goto done
 			}
 			i++
@@ -106,6 +106,51 @@ func getPathLocation() Location {
 
 done:
 	return location
+}
+
+func addToPath(path string, shouldPrepend bool) {
+	location := getPathLocation()
+	file, err := os.Open(location.Path)
+	if err != nil {
+		log.Fatal(err)
+	}
+	scanner := bufio.NewScanner(file)
+	var lines []string
+	for scanner.Scan() {
+		lines = append(lines, scanner.Text())
+	}
+	if shouldPrepend {
+		pathLine := lines[location.Index]
+		pathItems := strings.Split(pathLine, "=")
+		lines[location.Index] = "export PATH=" + path + ":" + pathItems[1]
+	} else {
+		pathItems := strings.Split(lines[location.Index], ":")
+		lastIndice := len(pathItems) - 1
+		if pathItems[lastIndice] == "$PATH" {
+			pathItems = pathItems[:lastIndice]
+			pathItems = append(pathItems, path, "$PATH")
+		} else {
+			pathItems = append(pathItems, path)
+		}
+		pathString := strings.Join(pathItems, ":")
+		lines[location.Index] = pathString
+	}
+
+	file.Close()
+	os.Remove(location.Path)
+	newFile, err := os.Create(location.Path)
+	if err != nil {
+		log.Fatal(err)
+	}
+	defer newFile.Close()
+	writer := bufio.NewWriter(newFile)
+	for _, line := range lines {
+		fmt.Fprintln(writer, line)
+	}
+	err = writer.Flush()
+	if err != nil {
+		log.Fatal(err)
+	}
 }
 
 func containsString(list []string, a string) bool {
@@ -143,13 +188,7 @@ func main() {
 			ShortName: "p",
 			Usage:     "Prepends the directory to your PATH variable",
 			Action: func(c *cli.Context) {
-				path := c.Args().First()
-				location := getPathLocation()
-				file, err := os.Open(location.Path)
-				if err != nil {
-					log.Fatal(err)
-				}
-				defer file.Close()
+				addToPath(c.Args().First(), true)
 			},
 		},
 		{
@@ -157,7 +196,7 @@ func main() {
 			ShortName: "a",
 			Usage:     "Appends the directory to your PATH variable",
 			Action: func(c *cli.Context) {
-				fmt.Println("added task: ", c.Args().First())
+				addToPath(c.Args().First(), false)
 			},
 		},
 		{
