@@ -114,11 +114,13 @@ func addToPath(path string, shouldPrepend bool) {
 	if err != nil {
 		log.Fatal(err)
 	}
+
 	scanner := bufio.NewScanner(file)
 	var lines []string
 	for scanner.Scan() {
 		lines = append(lines, scanner.Text())
 	}
+
 	if shouldPrepend {
 		pathLine := lines[location.Index]
 		pathItems := strings.Split(pathLine, "=")
