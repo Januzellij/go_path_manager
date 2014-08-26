@@ -78,14 +78,14 @@ func getPathLocation() Location {
 		log.Fatal(err)
 	}
 
-	for i, v := range paths {
-		paths[i] = strings.Replace(v, "~", usr.HomeDir, -1)
+	for i, path := range paths {
+		paths[i] = strings.Replace(path, "~", usr.HomeDir, -1)
 	}
 
 	search := regexp.MustCompile(`^(?:export )?PATH=`)
 	location := Location{}
-	for _, v := range paths {
-		file, err := os.Open(v)
+	for _, path := range paths {
+		file, err := os.Open(path)
 		if err != nil {
 			continue
 		}
@@ -94,7 +94,7 @@ func getPathLocation() Location {
 		i := 0
 		for scanner.Scan() {
 			if search.Match([]byte(scanner.Text())) {
-				location.Path = v
+				location.Path = path
 				location.Index = i
 				goto done
 			}
