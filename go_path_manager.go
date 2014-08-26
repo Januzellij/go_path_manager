@@ -122,8 +122,7 @@ func addToPath(path string, shouldPrepend bool) {
 	}
 
 	if shouldPrepend {
-		pathLine := lines[location.Index]
-		pathItems := strings.Split(pathLine, "=")
+		pathItems := strings.Split(lines[location.Index], "=")
 		lines[location.Index] = "export PATH=" + path + ":" + pathItems[1]
 	} else {
 		pathItems := strings.Split(lines[location.Index], ":")
