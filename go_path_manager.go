@@ -52,15 +52,13 @@ func getPathLocation() Location {
 		},
 	}
 
-	usercmd := exec.Command("whoami")
-	rawUser, err := usercmd.Output()
+	rawUser, err := exec.Command("whoami").Output()
 	if err != nil {
 		log.Fatal(err)
 	}
 
 	username := strings.Replace(string(rawUser), "\n", "", -1)
-	infocmd := exec.Command("finger", username)
-	info, err := infocmd.Output()
+	info, err := exec.Command("finger", username).Output()
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -135,8 +133,7 @@ func addToPath(path string, shouldPrepend bool) {
 		} else {
 			pathItems = append(pathItems, path)
 		}
-		pathString := strings.Join(pathItems, ":")
-		lines[location.Index] = pathString
+		lines[location.Index] = strings.Join(pathItems, ":")
 	}
 
 	file.Close()
